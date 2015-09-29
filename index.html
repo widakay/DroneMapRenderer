@@ -48,15 +48,21 @@
 				var start = Date.now();
 
 				loader.load( 'data/test.js', function ( geometry, material ) {
+
 					//var geometry = new THREE.BoxGeometry( 200, 200, 200 );
 					//var material = new THREE.MeshBasicMaterial( { map: texture } );
-					//var material = new THREE.MeshFaceMaterial( material );
+					//var material = new THREE.MeshFaceMaterial( materials );
+					//var material = new THREE.MeshFaceMaterial( material )["materials"][0];
+					//var material = new THREE.MeshLambertMaterial( { color: 0xffff00, specular: 0xffaa00, shininess: 10 } );
+
+
 					console.log(material);
 					console.log(geometry);
 
 					// new THREE.MeshPhongMaterial( { color: 0xffff00, specular: 0xffaa00, shininess: 10 } )
 					//mesh = new THREE.Mesh( geometry, new THREE.MeshFaceMaterial(material));
-					mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0xffff00, specular: 0xffaa00, shininess: 10 } ));
+
+					mesh = new THREE.Mesh( geometry, material);
 
 					mesh.scale.x = mesh.scale.y = mesh.scale.z = 100;
 					scene.add( mesh );
@@ -76,12 +82,12 @@
 				mesh2.position.set(400,0,0);
 				scene.add( mesh2 );
 
-				var light = new THREE.PointLight( 0xff0000, 1, 100 );
-				light.position.set( 500, 300, 50 );
+				var light = new THREE.PointLight( 0xffffff, 1, 10000 );
+				light.position.set( 100, 100, 50 );
 				scene.add( light );
 				scene.add(new THREE.PointLightHelper(light, 3));
 
-				var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+				var light = new THREE.AmbientLight( 0x000000 ); // soft white light
 				scene.add( light );
 
 				renderer = new THREE.WebGLRenderer();
@@ -111,10 +117,10 @@
 				requestAnimationFrame( animate );
 
 
-				mesh2.rotation.x += 0.005;
-				mesh2.rotation.y += 0.01;
-				mesh.rotation.x += 0.005;
-				mesh.rotation.y += 0.01;
+				mesh2.rotation.x += 0.0005;
+				mesh2.rotation.y += 0.001;
+				mesh.rotation.x += 0.0005;
+				mesh.rotation.y += 0.001;
 
 				renderer.render( scene, camera );
 				stats.update();
