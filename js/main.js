@@ -1,345 +1,181 @@
-			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+if (!Detector.webgl) Detector.addGetWebGLMessage();
 
-			var loaded = false;
-			var container, stats;
+var loaded = false;
+var container, stats;
 
-			var camera, scene, renderer, objects;
-			var particleLight;
-			var dae;
+var camera, scene, renderer, objects;
+var particleLight;
+var dae;
 
 
-			var loading = document.getElementById( 'loading' );
-			var blocker = document.getElementById( 'blocker' );
-			var instructions = document.getElementById( 'instructions' );
+var loading = document.getElementById('loading');
+var blocker = document.getElementById('blocker');
+var instructions = document.getElementById('instructions');
 
-			loading.style.display = '';
-			instructions.style.display = 'none';
+loading.style.display = '';
+instructions.style.display = 'none';
 
-			var controlsEnabled = false;
+var controlsEnabled = false;
 
-			var moveForward = false;
-			var moveBackward = false;
-			var moveLeft = false;
-			var moveRight = false;
-			var moveUp = false;
-			var moveDown = false;
-			var velocity = new THREE.Vector3(); 
+var moveForward = false;
+var moveBackward = false;
+var moveLeft = false;
+var moveRight = false;
+var moveUp = false;
+var moveDown = false;
+var velocity = new THREE.Vector3();
 
-			var clock = new THREE.Clock();
+var clock = new THREE.Clock();
 
-			var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
-			if ( havePointerLock ) {
 
-				var element = document.body;
+init();
+animate();
 
-				var pointerlockchange = function ( event ) {
+function init() {
 
-					if ( document.pointerLockElement === element || document.mozPointerLockElement === element || document.webkitPointerLockElement === element ) {
+    container = document.createElement('div');
+    document.body.appendChild(container);
 
-						controlsEnabled = true;
-						controls.enabled = true;
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 4000);
+    camera.position.set(0, 0, 0);
 
-						blocker.style.display = 'none';
+    scene = new THREE.Scene();
 
-					} else {
+    controls = new THREE.PointerLockControls(camera);
+    scene.add(controls.getObject());
 
-						controls.enabled = false;
+    addListeners();
 
-						blocker.style.display = '-webkit-box';
-						blocker.style.display = '-moz-box';
-						blocker.style.display = 'box';
+    addGrid();
 
-						instructions.style.display = '';
+    // Lights
+    scene.add(new THREE.AmbientLight(0xffffff));
 
-					}
+    // Fog
+    //scene.fog = new THREE.Fog( 0x7ec0ee, 75, 200 );
 
-				};
 
-				var pointerlockerror = function ( event ) {
+    renderer = new THREE.WebGLRenderer();
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
 
-					instructions.style.display = '';
+    stats = new Stats();
+    stats.domElement.style.position = 'absolute';
+    stats.domElement.style.top = '0px';
+    container.appendChild(stats.domElement);
 
-				};
 
-				// Hook pointer lock state change events
-				document.addEventListener( 'pointerlockchange', pointerlockchange, false );
-				document.addEventListener( 'mozpointerlockchange', pointerlockchange, false );
-				document.addEventListener( 'webkitpointerlockchange', pointerlockchange, false );
+    addSkybox();
+    addMesh();
+    addData();
+    window.addEventListener('resize', onWindowResize, false);
+    loading.style.display = 'none';
+    instructions.style.display = '';
+    console.log("done loading");
 
-				document.addEventListener( 'pointerlockerror', pointerlockerror, false );
-				document.addEventListener( 'mozpointerlockerror', pointerlockerror, false );
-				document.addEventListener( 'webkitpointerlockerror', pointerlockerror, false );
+}
 
-				instructions.addEventListener( 'click', function ( event ) {
+function onWindowResize() {
 
-					instructions.style.display = 'none';
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
 
-					// Ask the browser to lock the pointer
-					element.requestPointerLock = element.requestPointerLock || element.mozRequestPointerLock || element.webkitRequestPointerLock;
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
-					if ( /Firefox/i.test( navigator.userAgent ) ) {
+}
 
-						var fullscreenchange = function ( event ) {
+function animate() {
 
-							if ( document.fullscreenElement === element || document.mozFullscreenElement === element || document.mozFullScreenElement === element ) {
+    requestAnimationFrame(animate);
 
-								document.removeEventListener( 'fullscreenchange', fullscreenchange );
-								document.removeEventListener( 'mozfullscreenchange', fullscreenchange );
+    render();
+    stats.update();
 
-								element.requestPointerLock();
-							}
+}
 
-						};
 
-						document.addEventListener( 'fullscreenchange', fullscreenchange, false );
-						document.addEventListener( 'mozfullscreenchange', fullscreenchange, false );
+function render() {
 
-						element.requestFullscreen = element.requestFullscreen || element.mozRequestFullscreen || element.mozRequestFullScreen || element.webkitRequestFullscreen;
+    var timer = Date.now() * 0.0005;
 
-						element.requestFullscreen();
+    if (controlsEnabled) {
+        var delta = clock.getDelta();
 
-					} else {
+        velocity.x -= velocity.x * 10.0 * delta;
+        velocity.z -= velocity.z * 10.0 * delta;
+        velocity.y -= velocity.y * 10.0 * delta;
 
-						element.requestPointerLock();
+        var speed = 400;
+        if (moveForward) velocity.z -= speed * delta;
+        if (moveBackward) velocity.z += speed * delta;
 
-					}
+        if (moveLeft) velocity.x -= speed * delta;
+        if (moveRight) velocity.x += speed * delta;
 
-				}, false );
+        if (moveUp) velocity.y += speed * delta;
+        if (moveDown) velocity.y -= speed * delta;
 
-			} else {
+        controls.getObject().translateX(velocity.x * delta);
+        controls.getObject().translateY(velocity.y * delta);
+        controls.getObject().translateZ(velocity.z * delta);
 
-				instructions.innerHTML = 'Your browser doesn\'t seem to support Pointer Lock API';
 
-			}
+    }
 
 
-			var loader = new THREE.ColladaLoader();
-			loader.options.convertUpAxis = true;
-			loader.load( 'data/odm.dae', function ( collada ) {
+    THREE.AnimationHandler.update(clock.getDelta());
 
-				dae = collada.scene;
-				dae.scale.x = dae.scale.y = dae.scale.z = 20;
-				dae.rotation.x = -3.14/2;
-				dae.position.y = 50;
-				dae.updateMatrix();
-				
-				// Add the COLLADA
+    renderer.render(scene, camera);
 
-				scene.add( dae );
-				console.log("loaded dae");
-				document.getElementById("info").innerhtml = "done loading dae";
+}
 
+function addSkybox() {
 
-			} );
+    // Skybox
+    var geometry = new THREE.SphereGeometry(3000, 60, 40);
 
-			init();
-			animate();
 
-			function init() {
+    // shaders may be causing slowness
+    /*
+    var uniforms = {  
+    texture: { type: 't', value: THREE.ImageUtils.loadTexture('textures/sky.jpg') }
+    };
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
+    var material = new THREE.ShaderMaterial( {  
+    uniforms:       uniforms,
+    vertexShader:   document.getElementById('sky-vertex').textContent,
+    fragmentShader: document.getElementById('sky-fragment').textContent
+    });/*/
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 4000 );
-				camera.position.set( 0, 0, 0 );
+    var material = new THREE.MeshLambertMaterial({
+        map: THREE.ImageUtils.loadTexture('textures/sky.jpg')
+    })
 
-				scene = new THREE.Scene();
+    skyBox = new THREE.Mesh(geometry, material);
+    skyBox.scale.set(-1, 1, 1);
+    skyBox.eulerOrder = 'XZY';
+    skyBox.renderDepth = 1000.0;
+    scene.add(skyBox);
+}
 
-				controls = new THREE.PointerLockControls( camera );
-				scene.add( controls.getObject() );
+function addGrid() {
+    var size = 14,
+        step = 1;
 
-				var onKeyDown = function ( event ) {
+    var geometry = new THREE.Geometry();
+    var material = new THREE.LineBasicMaterial({
+        color: 0x303030
+    });
 
-					switch ( event.keyCode ) {
+    for (var i = -size; i <= size; i += step) {
 
-						case 38: // up
-						case 87: // w
-							moveForward = true;
-							break;
+        geometry.vertices.push(new THREE.Vector3(-size, -0.04, i));
+        geometry.vertices.push(new THREE.Vector3(size, -0.04, i));
 
-						case 37: // left
-						case 65: // a
-							moveLeft = true; break;
+        geometry.vertices.push(new THREE.Vector3(i, -0.04, -size));
+        geometry.vertices.push(new THREE.Vector3(i, -0.04, size));
 
-						case 40: // down
-						case 83: // s
-							moveBackward = true;
-							break;
-
-						case 39: // right
-						case 68: // d
-							moveRight = true;
-							break;
-
-						case 69: 
-							moveUp = true;
-							break;
-
-						case 81: 
-							moveDown = true;
-							break;
-
-					}
-
-				};
-
-				var onKeyUp = function ( event ) {
-
-					switch( event.keyCode ) {
-
-						case 38: // up
-						case 87: // w
-							moveForward = false;
-							break;
-
-						case 37: // left
-						case 65: // a
-							moveLeft = false;
-							break;
-
-						case 40: // down
-						case 83: // s
-							moveBackward = false;
-							break;
-
-						case 39: // right
-						case 68: // d
-							moveRight = false;
-							break;
-
-						case 69: 
-							moveUp = false;
-							break;
-
-						case 81: 
-							moveDown = false;
-							break;
-
-					}
-
-				};
-
-				document.addEventListener( 'keydown', onKeyDown, false );
-				document.addEventListener( 'keyup', onKeyUp, false );
-
-
-
-				// Grid
-
-				var size = 14, step = 1;
-
-				var geometry = new THREE.Geometry();
-				var material = new THREE.LineBasicMaterial( { color: 0x303030 } );
-
-				for ( var i = - size; i <= size; i += step ) {
-
-					geometry.vertices.push( new THREE.Vector3( - size, - 0.04, i ) );
-					geometry.vertices.push( new THREE.Vector3(   size, - 0.04, i ) );
-
-					geometry.vertices.push( new THREE.Vector3( i, - 0.04, - size ) );
-					geometry.vertices.push( new THREE.Vector3( i, - 0.04,   size ) );
-
-				}
-
-				var line = new THREE.LineSegments( geometry, material );
-				scene.add( line );
-
-
-				// Lights
-
-				scene.add( new THREE.AmbientLight( 0xffffff ) );
-
-				// Skybox
-				var geometry = new THREE.SphereGeometry(3000, 60, 40);  
-				var uniforms = {  
-				  texture: { type: 't', value: THREE.ImageUtils.loadTexture('textures/sky.png') }
-				};
-
-				var material = new THREE.ShaderMaterial( {  
-				  uniforms:       uniforms,
-				  vertexShader:   document.getElementById('sky-vertex').textContent,
-				  fragmentShader: document.getElementById('sky-fragment').textContent
-				});
-
-				skyBox = new THREE.Mesh(geometry, material);  
-				skyBox.scale.set(-1, 1, 1);  
-				skyBox.eulerOrder = 'XZY';  
-				skyBox.renderDepth = 1000.0;  
-				scene.add(skyBox);  
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
-
-				stats = new Stats();
-				stats.domElement.style.position = 'absolute';
-				stats.domElement.style.top = '0px';
-				container.appendChild( stats.domElement );
-
-
-				//
-
-				window.addEventListener( 'resize', onWindowResize, false );
-				loading.style.display = 'none';
-				instructions.style.display = '';
-				console.log("done loading");
-
-			}
-
-			function onWindowResize() {
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-			}
-
-			//
-
-			function animate() {
-
-				requestAnimationFrame( animate );
-
-				render();
-				stats.update();
-
-			}
-
-
-			function render() {
-
-				var timer = Date.now() * 0.0005;
-
-				if ( controlsEnabled ) {
-					var delta = clock.getDelta();
-
-					velocity.x -= velocity.x * 10.0 * delta;
-					velocity.z -= velocity.z * 10.0 * delta;
-					velocity.y -= velocity.y * 10.0 * delta;
-
-					var speed = 400;
-					if ( moveForward ) velocity.z -= speed * delta;
-					if ( moveBackward ) velocity.z += speed * delta;
-
-					if ( moveLeft ) velocity.x -= speed * delta;
-					if ( moveRight ) velocity.x += speed * delta;
-
-					if ( moveUp ) velocity.y += speed * delta;
-					if ( moveDown ) velocity.y -= speed * delta;
-
-					controls.getObject().translateX( velocity.x * delta );
-					controls.getObject().translateY( velocity.y * delta );
-					controls.getObject().translateZ( velocity.z * delta );
-
-
-				}
-
-
-				THREE.AnimationHandler.update( clock.getDelta() );
-
-				renderer.render( scene, camera );
-
-			}
+    }
+}
