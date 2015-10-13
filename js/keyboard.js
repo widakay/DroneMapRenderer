@@ -1,3 +1,5 @@
+// mostly from https://github.com/mrdoob/three.js/blob/master/examples/misc_controls_pointerlock.html
+
 
 var havePointerLock = 'pointerLockElement' in document || 'mozPointerLockElement' in document || 'webkitPointerLockElement' in document;
 
