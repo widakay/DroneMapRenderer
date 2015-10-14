@@ -27,17 +27,20 @@ var velocity = new THREE.Vector3();
 
 var clock = new THREE.Clock();
 
+var socket = io('http://happi.pw:3000', {path: '/socket.io/'});
+var otherViewer;
 
 
 init();
 animate();
 
 function init() {
+    socket.emit('status', "loading");
 
     container = document.createElement('div');
     document.body.appendChild(container);
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 4000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
     camera.position.set(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -48,6 +51,7 @@ function init() {
     addListeners();
 
     addGrid();
+    socket.emit('status', "grid loaded");
 
     // Lights
     scene.add(new THREE.AmbientLight(0xffffff));
@@ -68,12 +72,32 @@ function init() {
 
 
     addSkybox();
+    socket.emit('status', "skybox loaded");
     addMesh();
     addData();
     window.addEventListener('resize', onWindowResize, false);
     loading.style.display = 'none';
     instructions.style.display = '';
     console.log("done loading");
+    socket.emit('status', "done loading");
+
+    var geometry = new THREE.SphereGeometry( 5, 32, 32 );
+    var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+    otherViewer = new THREE.Mesh( geometry, material );
+    scene.add( otherViewer );
+
+    socket.on('position', function(pos){
+        otherViewer.position.x = pos.x;
+        otherViewer.position.y = pos.y;
+        otherViewer.position.z = pos.z;
+    });
+
+    setInterval(function(){
+        socket.emit('position', controls.getObject().position);
+    }, 1000/30);
+    socket.on('position', function(msg){
+    
+  });
 
 }
 
@@ -94,6 +118,7 @@ function animate() {
     stats.update();
 
 }
+
 
 
 function render() {
