@@ -90,6 +90,9 @@ if (havePointerLock) {
 
 
 function addListeners() {
+        window.addEventListener('resize', onWindowResize, false);
+    
+
     var onKeyDown = function(event) {
 
         switch (event.keyCode) {

@@ -1,18 +1,26 @@
 if (!Detector.webgl) Detector.addGetWebGLMessage();
 
 var loaded = false;
+var loadingMesh = false;
+var loadingData = false;
+
 var container, stats;
 
 var camera, scene, renderer, objects;
 var particleLight;
 var dae;
 
+var line, largeMesh;
+var gui;
+
 
 var loading = document.getElementById('loading');
 var blocker = document.getElementById('blocker');
 var instructions = document.getElementById('instructions');
+var info = document.getElementById('info');
 
-loading.style.display = '';
+loading.style.display = 'none';
+info.style.display = '';
 instructions.style.display = 'none';
 
 var controlsEnabled = false;
@@ -31,12 +39,16 @@ var socket = io('http://happi.pw:3000', {path: '/socket.io/'});
 var otherViewer;
 
 
-init();
-animate();
+
+$("#ok").click(function() {
+    info.style.display = 'none';
+    instructions.style.display = 'none';
+    loading.style.display = '';
+    init();
+    animate();
+});
 
 function init() {
-    socket.emit('status', "loading");
-
     container = document.createElement('div');
     document.body.appendChild(container);
 
@@ -44,21 +56,32 @@ function init() {
     camera.position.set(0, 0, 0);
 
     scene = new THREE.Scene();
-
     controls = new THREE.PointerLockControls(camera);
     scene.add(controls.getObject());
 
     addListeners();
-
     addGrid();
-    socket.emit('status', "grid loaded");
+    addLightsFog();
+    addRendererAndStats();
 
+    addSkybox();
+    addMesh('data/odm.dae');
+    addData('data/data.json');
+
+    setTimeout(checkLoadStatus, 100);
+
+    //initSocket();
+}
+
+function addLightsFog() {
     // Lights
     scene.add(new THREE.AmbientLight(0xffffff));
 
     // Fog
     //scene.fog = new THREE.Fog( 0x7ec0ee, 75, 200 );
+}
 
+function addRendererAndStats() {
 
     renderer = new THREE.WebGLRenderer();
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -69,22 +92,25 @@ function init() {
     stats.domElement.style.position = 'absolute';
     stats.domElement.style.top = '0px';
     container.appendChild(stats.domElement);
+}
 
 
-    addSkybox();
-    socket.emit('status', "skybox loaded");
-    addMesh();
-    addData();
-    window.addEventListener('resize', onWindowResize, false);
-    loading.style.display = 'none';
-    instructions.style.display = '';
-    console.log("done loading");
-    socket.emit('status', "done loading");
+function checkLoadStatus() {
+    if (loadingMesh || loadingData) {
+        setTimeout(checkLoadStatus, 100);
+    }
+    else {
+        loaded = true;
+        doneLoading();
+    }
+}
 
+function initSocket() {
     var geometry = new THREE.SphereGeometry( 5, 32, 32 );
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
     otherViewer = new THREE.Mesh( geometry, material );
     scene.add( otherViewer );
+
 
     socket.on('position', function(pos){
         otherViewer.position.x = pos.x;
@@ -95,10 +121,15 @@ function init() {
     setInterval(function(){
         socket.emit('position', controls.getObject().position);
     }, 1000/30);
-    socket.on('position', function(msg){
-    
-  });
 
+}
+
+function doneLoading() {
+    console.log("done loading");
+    socket.emit('status', "done loading");
+    info.style.display = 'none';
+    instructions.style.display = '';
+    loading.style.display = 'none';
 }
 
 function onWindowResize() {

@@ -1,8 +1,9 @@
-function addData() {
+function addData(url) {
+    loadingData = true;
 
     var xobj = new XMLHttpRequest();
     xobj.overrideMimeType("application/json");
-    xobj.open('GET', 'data/data.json', true);
+    xobj.open('GET', url, true);
 
     xobj.onreadystatechange = function() {
         if (xobj.readyState == 4 && xobj.status == "200") {
@@ -11,12 +12,10 @@ function addData() {
             var i = 0;
             for (var point in data["data"]) {
                 var p = data["data"][point];
-                console.log(p["pos"][0], p["pos"][1], p["pos"][2]);
 
                 geometry.vertices.push(
                     new THREE.Vector3(50000*(p["pos"][0]+122.2787), p["pos"][2]-220, 50000*(p["pos"][1]-37.46244))
                 );
-                
                 geometry.colors[i++] = new THREE.Color(0.1, 0.1, (p["pressure"]-988)/10.0);
             }
 
@@ -26,10 +25,15 @@ function addData() {
                 vertexColors: THREE.VertexColors
             });
 
-            var line = new THREE.Line(geometry, material, THREE.Line);
+            line = new THREE.Line(geometry, material, THREE.Line);
 
             scene.add(line);
+            loadingData = false;
         }
     };
     xobj.send(null);
+}
+
+function removeData() {
+    scene.remove(line);
 }

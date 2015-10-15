@@ -8,16 +8,19 @@
 	</head>
 	<body>
 		<div id="blocker">
-
 			<div id="instructions">
 				<span style="font-size:40px">Click to view</span>
 				<br />
-				(W, A, S, D = Move, Q = Down, E = Up, MOUSE = Look around)<br>
-				<div id="info"></div>
+				(W, A, S, D = Move, Q = Down, E = Up, MOUSE = Look around)<br>Press escape to exit<br>
 			</div>
 			<div id="loading">Loading...</div>
-
+			
+			<div id="info">This website loads about 80MB of meshes and has been known to crash computers. Please only run on a recent computer (integrated graphics ok). Would you like to continue?
+			<div id="ok">Yes</div>
+			</div>
 		</div>
+
+
 		<script type="application/x-glsl" id="sky-vertex">  
 			varying vec2 vUV;
 
