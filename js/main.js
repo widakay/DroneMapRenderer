@@ -70,7 +70,7 @@ function init() {
 
     setTimeout(checkLoadStatus, 100);
 
-    //initSocket();
+    initSocket();
 }
 
 function addLightsFog() {
