@@ -39,7 +39,6 @@ var socket = io('http://happi.pw:3000', {path: '/socket.io/'});
 var otherViewer;
 
 
-
 $("#ok").click(function() {
     info.style.display = 'none';
     instructions.style.display = 'none';
@@ -65,12 +64,20 @@ function init() {
     addRendererAndStats();
 
     addSkybox();
-    addMesh('data/odm.dae');
-    addData('data/data.json');
+    loadDataset('data');
 
     setTimeout(checkLoadStatus, 100);
-
+    initGUI();
     initSocket();
+}
+
+function loadDataset(dataset) {
+    removeMesh();
+    removeData();
+
+    addMesh(dataset+'/odm.dae');
+    addData(dataset+'/data.json');
+    debug("started dataset load: " + dataset);
 }
 
 function addLightsFog() {
@@ -125,11 +132,15 @@ function initSocket() {
 }
 
 function doneLoading() {
-    console.log("done loading");
-    socket.emit('status', "done loading");
+    debug("done loading");
     info.style.display = 'none';
     instructions.style.display = '';
     loading.style.display = 'none';
+}
+
+function debug(d) {
+    console.log("debug:", d);
+    socket.emit('debug', JSON.stringify(d));
 }
 
 function onWindowResize() {

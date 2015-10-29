@@ -12,7 +12,6 @@ function addMesh(url) {
         largeMesh.updateMatrix();
 
         scene.add(largeMesh);
-        console.log("loaded dae");
         loadingMesh = false;
     });
 }

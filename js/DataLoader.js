@@ -10,13 +10,20 @@ function addData(url) {
             data = JSON.parse(xobj.responseText);
             var geometry = new THREE.Geometry();
             var i = 0;
+
+            var scale = data["scale"];      // 50000
+            var offset = data["offset"];    // [122.2787, 37.46244, 220]
+            var rotation = data["rotation"];
+
+
+
             for (var point in data["data"]) {
                 var p = data["data"][point];
 
                 geometry.vertices.push(
-                    new THREE.Vector3(50000*(p["pos"][0]+122.2787), p["pos"][2]-220, 50000*(p["pos"][1]-37.46244))
+                    new THREE.Vector3(scale*(p["pos"][0]+offset[0]), p["pos"][2]-offset[2], scale*(p["pos"][1]-offset[1]))
                 );
-                geometry.colors[i++] = new THREE.Color(0.1, 0.1, (p["pressure"]-988)/10.0);
+                geometry.colors[i++] = new THREE.Color(0.1, 1-(p["pressure"]-988)/10.0, (p["pressure"]-988)/10.0);
             }
 
             var material = new THREE.LineBasicMaterial({
@@ -29,6 +36,7 @@ function addData(url) {
 
             scene.add(line);
             loadingData = false;
+            debug("loaded data");
         }
     };
     xobj.send(null);
