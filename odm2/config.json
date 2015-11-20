@@ -1,0 +1,8 @@
+{
+	"scale":40,
+	"rotation":[-1.96,-0.57,0],
+	"offset":[-1000,1250,-500],
+	"meshURL":"odm.dae",
+	"datasetURL":"data.json",
+	"sensors":["pressure","temperature"]
+}
