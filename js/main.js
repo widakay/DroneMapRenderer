@@ -64,10 +64,9 @@ function init() {
     addRendererAndStats();
 
     addSkybox();
-    loadDataset('data');
+    loadDataset(guiManager.dataset);
 
     setTimeout(checkLoadStatus, 100);
-    initGUI();
     initSocket();
 }
 
@@ -75,9 +74,16 @@ function loadDataset(dataset) {
     removeMesh();
     removeData();
 
-    addMesh(dataset+'/odm.dae');
-    addData(dataset+'/data.json');
-    debug("started dataset load: " + dataset);
+    $.getJSON(dataset+'config.json', function(info) {
+        console.log("loaddataset");
+        console.log(info);
+
+        addData(dataset+info['datasetURL']);
+        debug("started dataset load: " + dataset);
+
+        addMesh(dataset, info);
+    });
+    
 }
 
 function addLightsFog() {
@@ -107,6 +113,8 @@ function checkLoadStatus() {
         setTimeout(checkLoadStatus, 100);
     }
     else {
+        // avoid problems due to not having datasets loaded when initalizing GUI
+        initGUI();
         loaded = true;
         doneLoading();
     }
@@ -116,7 +124,7 @@ function initSocket() {
     var geometry = new THREE.SphereGeometry( 5, 32, 32 );
     var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
     otherViewer = new THREE.Mesh( geometry, material );
-    scene.add( otherViewer );
+    //scene.add( otherViewer );
 
 
     socket.on('position', function(pos){
@@ -126,7 +134,8 @@ function initSocket() {
     });
 
     setInterval(function(){
-        socket.emit('position', controls.getObject().position);
+        guiManager.position = controls.getObject().position;
+        socket.emit('position', guiManager);
     }, 1000/30);
 
 }
@@ -174,7 +183,7 @@ function render() {
         velocity.z -= velocity.z * 10.0 * delta;
         velocity.y -= velocity.y * 10.0 * delta;
 
-        var speed = 400;
+        var speed = guiManager.speed;
         if (moveForward) velocity.z -= speed * delta;
         if (moveBackward) velocity.z += speed * delta;
 
