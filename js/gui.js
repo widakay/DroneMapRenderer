@@ -21,7 +21,7 @@ guiManager = new DatsetManager();
 
 function initGUI() {
     debug("gui init");
-/*
+
 	guiManager.xoffset = largeMesh.position.x;
 	guiManager.yoffset = largeMesh.position.y;
 	guiManager.zoffset = largeMesh.position.z;
@@ -30,7 +30,7 @@ function initGUI() {
 	guiManager.xrot = largeMesh.rotation.z;
 	guiManager.yrot = largeMesh.rotation.y;
 	guiManager.zrot = largeMesh.rotation.z;
-*/
+
 
     gui = new dat.GUI();
     var dataset = gui.add(guiManager, 'dataset', { A: "odm2/", B: "data/" } );
