@@ -3,8 +3,8 @@ var largeMesh;
 function addMesh(basepath, info) {
     loadingMesh = true;
     
-    loadingMesh = false;
-    return;
+    //loadingMesh = false;
+    //return;
     var url = basepath + info["meshURL"];
     var loader = new THREE.ColladaLoader();
     loader.options.convertUpAxis = true;
