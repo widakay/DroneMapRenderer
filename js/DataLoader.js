@@ -45,18 +45,24 @@ function displayData(data) {
     for (var point in data["data"]) {
         var p = data["data"][point];
 
-        var lon = (p["pos"][0] + offset[0])/180.0*Math.PI;
-        var lat = (p["pos"][1] + offset[1])/180.0*Math.PI;
-        var alt = p["pos"][2] + offset[2] + 63;// + 6378100;
+        //var lon = (p["pos"][0] + offset[0])/180.0*Math.PI;
+        //var lat = (p["pos"][1] + offset[1])/180.0*Math.PI;
+        //var alt = p["pos"][2] + offset[2] + 6378100;
+        var lon = (p["pos"][0])/180.0*Math.PI;
+        var lat = (p["pos"][1])/180.0*Math.PI;
+        var alt = p["pos"][2] + 6378100;
 
-        lon = lon*100000;
-        lat = lat*100000;
+        //lat = lat + Math.PI/0.0;
+
+        //lon = lon*100;
+        //lat = lat*100;
 
         var x = alt*Math.cos(lat)*Math.sin(lon);
-        var y = alt*Math.cos(lon) - 63;//-6378100;
-        var z = alt*Math.sin(lat)*Math.sin(lon);
+        var z = alt*Math.cos(lon);
+        var y = alt*Math.sin(lat)*Math.sin(lon);
 
         var datapoint = new THREE.Vector3(x, y, z);
+
         console.log(lat, lon, alt, datapoint);
 
         geometry.vertices.push(datapoint);
