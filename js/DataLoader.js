@@ -28,7 +28,7 @@ function displayData(data) {
     var geometry = new THREE.Geometry();
     var i = 0;
 
-    var scale = 100000;//data["scale"];      // 50000
+    var scale = data["scale"];      // 50000
     var offset = data["offset"];    // [122.2787, 37.46244, 220]
     var rotation = data["rotation"];
 
@@ -50,16 +50,20 @@ function displayData(data) {
         //var alt = p["pos"][2] + offset[2] + 6378100;
         var lon = (p["pos"][0])/180.0*Math.PI;
         var lat = (p["pos"][1])/180.0*Math.PI;
-        var alt = p["pos"][2] + 6378100;
+        var alt = p["pos"][2] + 5000;//+ 6378100;
 
         //lat = lat + Math.PI/0.0;
 
         //lon = lon*100;
         //lat = lat*100;
 
-        var x = alt*Math.cos(lat)*Math.sin(lon);
+/*        var x = alt*Math.cos(lat)*Math.sin(lon);
         var z = alt*Math.cos(lon);
         var y = alt*Math.sin(lat)*Math.sin(lon);
+*/
+        var x = scale*(p["pos"][0]+offset[0]);
+        var y = scale*(p["pos"][2]+offset[2])/50000.0;
+        var z = scale*(p["pos"][1]+offset[1]);
 
         var datapoint = new THREE.Vector3(x, y, z);
 

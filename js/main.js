@@ -51,7 +51,7 @@ function init() {
     container = document.createElement('div');
     document.body.appendChild(container);
 
-    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 10000);
+    camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 20000);
     camera.position.set(0, 0, 0);
 
     scene = new THREE.Scene();
@@ -210,7 +210,7 @@ function render() {
 function addSkybox() {
 
     // Skybox
-    var geometry = new THREE.SphereGeometry(3000, 60, 40);
+    var geometry = new THREE.SphereGeometry(10000, 60, 40);
 
 
     // shaders may be causing slowness

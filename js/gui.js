@@ -1,5 +1,5 @@
 var DatsetManager = function() {
-  this.dataset = 'data/';
+  this.dataset = 'odm2/';
   this.xoffset = 0;
   this.yoffset = 0;
   this.zoffset = 0;
@@ -38,13 +38,13 @@ function initGUI() {
 
     var meshSettings = gui.addFolder('MeshOffset');
 
-    meshSettings.add(guiManager, 'xoffset',  -1000, 1000).onChange(function(offset) {
+    meshSettings.add(guiManager, 'xoffset',  largeMesh.position.x-100, largeMesh.position.x+100).onChange(function(offset) {
     	largeMesh.position.x = offset;
     });
-    meshSettings.add(guiManager, 'yoffset',  -1000, 2000).onChange(function(offset) {
+    meshSettings.add(guiManager, 'yoffset',  largeMesh.position.y-100, largeMesh.position.y+100).onChange(function(offset) {
     	largeMesh.position.y = offset;
     });
-    meshSettings.add(guiManager, 'zoffset',  -1000, 1000).onChange(function(offset) {
+    meshSettings.add(guiManager, 'zoffset',  largeMesh.position.z-100, largeMesh.position.z+100).onChange(function(offset) {
     	largeMesh.position.z = offset;
     });
 
