@@ -4,6 +4,7 @@ css/main.css
 data/data.json
 data/non_visible_faces_texture.jpg
 
+data/config.json
 data/test.bin
 data/test.js
 data/texture_0.jpg
@@ -32,6 +33,7 @@ js/MeshLoader.js
 js/PointerLockControls.js
 js/stats.min.js
 js/three.min.js
+odm2/config.json
 odm2/data.json
 odm2/non_visible_faces_texture.jpg
 odm2/texture_0.jpg
