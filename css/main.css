@@ -22,6 +22,17 @@ body {
 	text-align: center;
 }
 
+#code {
+	position: absolute;
+	width: 100%;
+
+	color: white;
+	margin-left: auto;
+	margin-right: auto;
+	font-size: 1em;
+	text-align: center;
+}
+
 #loading {
 	color: white;
 	margin-left: auto;
