@@ -34,6 +34,14 @@ if (havePointerLock) {
 
         instructions.style.display = '';
 
+        // Stop all movement
+        moveForward = false;
+        moveLeft = false;
+        moveBackward = false;
+        moveRight = false;
+        moveUp = false;
+        moveDown = false;
+
     };
 
     // Hook pointer lock state change events
